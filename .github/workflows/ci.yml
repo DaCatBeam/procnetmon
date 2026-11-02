@@ -1,0 +1,62 @@
+# Checks pull requests against the PR standards in DEVELOPERS.md: formatting, clippy pedantic with
+# no warnings, and the tests.
+name: CI
+
+on:
+  pull_request:
+  # Also on main. A pull request can only restore caches made on its own branch or on main, so runs
+  # on main keep a warm cache for every new pull request.
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A new push to a pull request cancels its run that's still going.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  # The Rust the Dockerfile builds with, pinned so a new release's lints can't suddenly fail a pull
+  # request. Bump it together with the Dockerfile.
+  RUSTUP_TOOLCHAIN: "1.99"
+
+jobs:
+  fmt:
+    name: Formatting
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install "$RUSTUP_TOOLCHAIN" --profile minimal --component rustfmt
+      - run: cargo fmt --check
+
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install "$RUSTUP_TOOLCHAIN" --profile minimal --component clippy
+      - uses: Swatinem/rust-cache@v2
+      # The lint command from DEVELOPERS.md, with every warning made an error.
+      - run: cargo clippy --locked --all-targets -- -W clippy::pedantic -D warnings
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install "$RUSTUP_TOOLCHAIN" --profile minimal
+      - uses: Swatinem/rust-cache@v2
+      # On Linux this includes tests/procfs_live.rs, which reads the runner's own /proc/net/dev.
+      - run: cargo test --locked

@@ -116,5 +116,3 @@ To contribute, open a pull request against `main` that meets the [PR standards](
 
 ## License
 See [LICENSE](LICENSE).
-
-TODO: delet this line in PR to get badge/test GH CI
