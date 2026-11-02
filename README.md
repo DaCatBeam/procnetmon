@@ -1,6 +1,6 @@
 # procnetmon
 
-[![CI](https://github.com/DaCatBeam/procnetmon/actions/workflows/ci.yml/badge.svg)](https://github.com/DaCatBeam/procnetmon/actions/workflows/ci.yml)
+[![CI](https://github.com/DaCatBeam/procnetmon/actions/workflows/ci.yml/badge.svg)](https://github.com/DaCatBeam/procnetmon/actions/workflows/ci.yml) [![Built With Ratatui](https://ratatui.rs/built-with-ratatui/badge.svg)](https://ratatui.rs/)
 
 Live terminal charts for Linux network interfaces, read straight from `/proc/net/dev`.
 
